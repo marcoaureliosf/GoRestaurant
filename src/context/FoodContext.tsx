@@ -1,6 +1,7 @@
 import { createContext, ReactNode, useContext, useEffect, useState } from 'react';
 import { Food } from '../components/Food';
 import { FoodModal } from '../components/FoodModal';
+import { api } from '../services/api';
 
 interface Food {
     id: number;
@@ -18,14 +19,14 @@ interface FoodProviderProps {
 interface FoodContextType {
     isOpenModal: boolean;
     setIsOpenModal: (newState: boolean) => void;
-    selectedUser: number;
-    setSelectedUser: (newState: number) => void;
+    selectedFood: number;
+    setSelectedFood: (newState: number) => void;
     foods: Food[];
     setFoods: (newState: Food[]) => void;
-    createFood: () => void;
-    updateFood: () => void;
-    deleteFood: (id: number) => void;
-    editAvailableFood: (id: number) => void;
+    createFood: () => Promise<void>;
+    updateFood: () => Promise<void>;
+    deleteFood: (id: number) => Promise<void>;
+    editAvailableFood: (available: boolean) => Promise<void>;
     image: string;
     setImage: (newState: string) => void;
     name: string;
@@ -34,8 +35,6 @@ interface FoodContextType {
     setPrice: (newState: string) => void;
     description: string
     setDescription: (newState: string) => void;
-    available: boolean;
-    setAvailable: (newState: boolean) => void;
 }
 
 const FoodContext = createContext<FoodContextType>({} as FoodContextType);
@@ -44,30 +43,25 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
     const [foods, setFoods] = useState<Food[]>([]);
 
     const [isOpenModal, setIsOpenModal] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(-1);
+    const [selectedFood, setSelectedFood] = useState(-1);
 
     const [image, setImage] = useState('')
     const [name, setName] = useState('')
     const [price, setPrice] = useState('')
     const [description, setDescription] = useState('')
-    const [available, setAvailable] = useState(true)
 
     useEffect(() => {
-        async function loadFoods() {
+        async function loadFoods(): Promise<void> {
+            const foodList = await api.get<Food[]>('/foods');
 
-            const foodList = {
-                "foods": [
-                    { id: 1, image: 'image', name: 'name', price: 'price', description: 'description', available: true }
-                ]
-            }
 
-            setFoods(foodList.foods)
+            setFoods(foodList.data)
         }
 
         loadFoods()
     }, [])
 
-    function createFood() {
+    async function createFood() {
         try {
 
             const data = {
@@ -76,9 +70,10 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
                 name: name,
                 price: price,
                 description: description,
-                available: available,
+                available: true,
             }
 
+            await api.post('/foods', data)
             setFoods([...foods, data])
 
             setImage('')
@@ -90,7 +85,7 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
         }
     }
 
-    function updateFood() {
+    async function updateFood() {
         try {
 
             const data = {
@@ -101,7 +96,7 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
             }
 
             const newFoodList = foods.map(currentFood => {
-                if (currentFood.id !== selectedUser) {
+                if (currentFood.id !== selectedFood) {
                     return currentFood;
                 }
                 return {
@@ -111,17 +106,22 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
                 }
             })
 
-            setSelectedUser(-1)
+            const foodSelected = newFoodList.filter(currentFood => currentFood.id === selectedFood)
+            await api.put(`/foods/${selectedFood}`, foodSelected[0])
+
             setFoods(newFoodList)
 
+            setSelectedFood(-1)
         } catch (error) {
             console.log(error)
         }
     }
 
-    function deleteFood(id: number) {
+    async function deleteFood(id: number) {
         try {
             const newFoodList = foods.filter((item) => item.id !== id);
+
+            await api.delete(`/foods/${id}`)
             setFoods(newFoodList)
 
         } catch (error) {
@@ -129,18 +129,25 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
         }
     }
 
-    function editAvailableFood(id: number) {
+    async function editAvailableFood(available: boolean) {
         try {
-            const newFoodList = foods.map(currentFood => {
-                if (currentFood.id !== id) {
-                    return currentFood;
-                }
-                return {
-                    ...currentFood,
-                    available: !available
-                }
-            })
-            setFoods(newFoodList);
+            if (selectedFood !== -1) {
+                const newFoodList = foods.map(currentFood => {
+                    if (currentFood.id !== selectedFood) {
+                        return currentFood;
+                    }
+                    return {
+                        ...currentFood,
+                        available: !available
+                    }
+                })
+
+                const foodSelected = newFoodList.filter(currentFood => currentFood.id === selectedFood)
+
+                await api.put(`/foods/${selectedFood}`, foodSelected[0])
+                setFoods(newFoodList);
+                setSelectedFood(-1)
+            }
         } catch (error) {
             console.log(error)
         }
@@ -151,8 +158,8 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
             value={{
                 isOpenModal,
                 setIsOpenModal,
-                selectedUser,
-                setSelectedUser,
+                selectedFood,
+                setSelectedFood,
                 foods,
                 setFoods,
                 createFood,
@@ -167,8 +174,6 @@ export function FoodProvider({ children }: FoodProviderProps): JSX.Element {
                 setPrice,
                 description,
                 setDescription,
-                available,
-                setAvailable,
             }}
         >
             {children}

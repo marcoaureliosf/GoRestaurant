@@ -16,17 +16,17 @@ interface FoodProps {
 
 export function Food({ id, image, name, price, description, available }: FoodProps) {
 
-    const { editAvailableFood, deleteFood, setSelectedUser, setIsOpenModal, setImage, setName, setPrice, setDescription, setAvailable } = useFood();
+    const { editAvailableFood, deleteFood, setSelectedFood, setIsOpenModal, setImage, setName, setPrice, setDescription } = useFood();
 
     function handleUpdate() {
         setIsOpenModal(true)
 
-        setImage(image) 
-        setName(name) 
-        setPrice(price) 
+        setImage(image)
+        setName(name)
+        setPrice(price)
         setDescription(description);
-        
-        setSelectedUser(id)
+
+        setSelectedFood(id)
     }
 
     function handleDelete() {
@@ -34,9 +34,8 @@ export function Food({ id, image, name, price, description, available }: FoodPro
     }
 
     function handleEditAvailable() {
-        setAvailable(available)
-
-        editAvailableFood(id)
+        editAvailableFood(available)
+        setSelectedFood(id)
     }
 
     return (

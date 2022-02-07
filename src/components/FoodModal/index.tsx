@@ -8,21 +8,21 @@ import { Container } from "./styles";
 
 export function FoodModal() {
 
-    const { isOpenModal, setIsOpenModal, selectedUser, createFood, updateFood, image, setImage, name, setName, price, setPrice, description, setDescription } = useFood();
+    const { isOpenModal, setIsOpenModal, selectedFood, createFood, updateFood, image, setImage, name, setName, price, setPrice, description, setDescription, setSelectedFood } = useFood();
 
     function handleClose() {
         setImage('') 
         setName('') 
         setPrice('') 
         setDescription('');
-
+        setSelectedFood(-1);
         setIsOpenModal(false);
     }
 
     function handleSubmit(e: FormEvent) {
         e.preventDefault();
 
-        if (selectedUser !== -1) {
+        if (selectedFood !== -1) {
             updateFood();
         } else {
             createFood();
