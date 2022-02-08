@@ -8,6 +8,8 @@
 
 ![gif](github/GoRestaurant.gif)
 ![gif](github/GoRestaurantM.gif)
+![png1](github/goRestaurantImg1.png)
+![png2](github/goRestaurantImg2.png)
 
 ## :rocket: Tecnologias
 
