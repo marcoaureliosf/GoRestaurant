@@ -1,5 +1,5 @@
- <h1 align="center">
-   GoRestaurant
+<h1 align="center">
+  GoRestaurant
 </h1>
 
 <br>
@@ -42,8 +42,11 @@ GoRestaurant é um CRUD que manipula vendas de pratos italianos que são salvos 
 ## ⚙ Configuração
 
 1- Para instalar as dependências:
+
 > yarn
 
 2- Para iniciar a aplicação digite cada comando em 2 terminais paralelos diferentes:
+
 > yarn server
+
 > yarn dev
